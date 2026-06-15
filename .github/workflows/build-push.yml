@@ -20,4 +20,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/burrotinto/mox-comfyui:latest
+          tags: ghcr.io/burrotinto/mox-comfyui-v2:latest
