@@ -31,6 +31,12 @@ download_model \
     "https://huggingface.co/cagliostrolab/animagine-xl-4.0/resolve/main/animagine-xl-4.0.safetensors" \
     "animagine-xl-4.0"
 
+# Illustrious-XL v2.0 — public HuggingFace model (newer anime/NSFW alternative to animagine)
+download_model \
+    "$CKPT_DIR/Illustrious-XL-v2.0.safetensors" \
+    "https://huggingface.co/OnomaAIResearch/Illustrious-XL-v2.0/resolve/main/Illustrious-XL-v2.0.safetensors" \
+    "Illustrious-XL-v2.0"
+
 # NSFW LoRA — URL from NSFW_LORA_URL env var (set in RunPod template)
 if [ -n "$NSFW_LORA_URL" ]; then
     download_model \
