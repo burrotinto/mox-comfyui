@@ -16,3 +16,10 @@ RUN printf '\nmox_extra:\n    base_path: /runpod-volume/\n    instantid: models/
 
 # Copy face reference and KPS image so they're always available in workflows
 COPY input/ /comfyui/input/
+
+# Model download script — runs on cold start, downloads to network volume if not present
+COPY download_extra_models.sh /download_extra_models.sh
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /download_extra_models.sh /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
