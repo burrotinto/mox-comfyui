@@ -31,4 +31,4 @@ jobs:
           push: true
           tags: |
             ghcr.io/burrotinto/mox-comfyui-v2:latest
-            ghcr.io/burrotinto/mox-comfyui-v2:v4
+            ghcr.io/burrotinto/mox-comfyui-v2:v5
