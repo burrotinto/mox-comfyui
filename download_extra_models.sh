@@ -1,29 +1,44 @@
 #!/bin/bash
 # Downloads extra models to the network volume on first startup.
-# Runs before ComfyUI starts — safe to run on every worker cold start.
+# All downloads are best-effort — failures are logged but don't crash ComfyUI.
 
 CKPT_DIR="/runpod-volume/models/checkpoints"
 LORA_DIR="/runpod-volume/models/loras"
 
-mkdir -p "$CKPT_DIR" "$LORA_DIR"
+mkdir -p "$CKPT_DIR" "$LORA_DIR" || true
+
+download_model() {
+    local dest="$1"
+    local url="$2"
+    local name="$3"
+    if [ -f "$dest" ]; then
+        echo "[mox] $name already present, skipping."
+        return 0
+    fi
+    echo "[mox] Downloading $name..."
+    if wget -q --timeout=600 --tries=2 -O "${dest}.tmp" "$url" 2>&1; then
+        mv "${dest}.tmp" "$dest"
+        echo "[mox] $name done."
+    else
+        rm -f "${dest}.tmp"
+        echo "[mox] WARNING: $name download failed — ComfyUI will start without it."
+    fi
+}
 
 # animagine-xl-4.0 — public HuggingFace model
-if [ ! -f "$CKPT_DIR/animagine-xl-4.0.safetensors" ]; then
-    echo "[mox] Downloading animagine-xl-4.0 (~6.5 GB)..."
-    wget -q -O "$CKPT_DIR/animagine-xl-4.0.safetensors" \
-        "https://huggingface.co/cagliostrolab/animagine-xl-4.0/resolve/main/animagine-xl-4.0.safetensors"
-    echo "[mox] animagine-xl-4.0 done."
+download_model \
+    "$CKPT_DIR/animagine-xl-4.0.safetensors" \
+    "https://huggingface.co/cagliostrolab/animagine-xl-4.0/resolve/main/animagine-xl-4.0.safetensors" \
+    "animagine-xl-4.0"
+
+# NSFW LoRA — URL from NSFW_LORA_URL env var (set in RunPod template)
+if [ -n "$NSFW_LORA_URL" ]; then
+    download_model \
+        "$LORA_DIR/NsfwPovAllInOneLoraSdxl.safetensors" \
+        "$NSFW_LORA_URL" \
+        "NSFW LoRA"
 else
-    echo "[mox] animagine-xl-4.0 already present, skipping."
+    echo "[mox] NSFW_LORA_URL not set, skipping LoRA."
 fi
 
-# NSFW LoRA — URL passed via NSFW_LORA_URL env var (set in RunPod template)
-if [ -n "$NSFW_LORA_URL" ] && [ ! -f "$LORA_DIR/NsfwPovAllInOneLoraSdxl.safetensors" ]; then
-    echo "[mox] Downloading NSFW LoRA (~1.7 GB)..."
-    wget -q -O "$LORA_DIR/NsfwPovAllInOneLoraSdxl.safetensors" "$NSFW_LORA_URL"
-    echo "[mox] NSFW LoRA done."
-elif [ -f "$LORA_DIR/NsfwPovAllInOneLoraSdxl.safetensors" ]; then
-    echo "[mox] NSFW LoRA already present, skipping."
-else
-    echo "[mox] NSFW_LORA_URL not set, skipping LoRA download."
-fi
+echo "[mox] Model setup complete, starting ComfyUI..."
