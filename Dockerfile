@@ -11,8 +11,8 @@ RUN mkdir -p /comfyui/models/insightface/models/antelopev2 && \
         wget -q -O $f "https://huggingface.co/MonsterMMORPG/tools/resolve/main/$f"; \
     done
 
-# Register instantid path from network volume (ip-adapter + controlnet stay on volume)
-RUN printf '\nmox_extra:\n    base_path: /runpod-volume/\n    instantid: models/instantid/\n' >> /comfyui/extra_model_paths.yaml
+# Register volume paths: instantid (ip-adapter + controlnet) + loras (NSFW LoRA) + checkpoints (animagine)
+RUN printf '\nmox_extra:\n    base_path: /runpod-volume/\n    instantid: models/instantid/\n    loras: models/loras/\n    checkpoints: models/checkpoints/\n' >> /comfyui/extra_model_paths.yaml
 
 # Copy face reference and KPS image so they're always available in workflows
 COPY input/ /comfyui/input/
