@@ -7,6 +7,11 @@ LORA_DIR="/runpod-volume/models/loras"
 
 mkdir -p "$CKPT_DIR" "$LORA_DIR" || true
 
+if [ -f "$CKPT_DIR/juggernautXL_v8Rundiffusion.safetensors" ]; then
+    echo "[mox] Removing retired juggernautXL_v8Rundiffusion.safetensors to free volume space..."
+    rm -f "$CKPT_DIR/juggernautXL_v8Rundiffusion.safetensors"
+fi
+
 download_model() {
     local dest="$1"
     local url="$2"
